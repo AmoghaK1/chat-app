@@ -1,22 +1,20 @@
 import { Injectable } from '@angular/core';
-import {
-  getDownloadURL,
-  ref,
-  Storage,
-  uploadBytes,
-} from '@angular/fire/storage';
-import { from, Observable, switchMap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ImageUploadService {
-  constructor(private storage: Storage) {}
+  constructor(private http: HttpClient) {}
 
-  uploadImage(image: File, path: string): Observable<string> {
-    const storageRef = ref(this.storage, path);
-    const uploadTask = from(uploadBytes(storageRef, image));
-    return uploadTask.pipe(switchMap((result) => getDownloadURL(result.ref)));
+  uploadImage(image: File, _path: string): Observable<string> {
+    const form = new FormData();
+    form.append('file', image);
+    return this.http
+      .post<{ url: string }>(`${environment.apiBaseUrl}/upload`, form)
+      .pipe(map((res) => `${environment.apiBaseUrl.replace('/api', '')}${res.url}`));
   }
 }
 

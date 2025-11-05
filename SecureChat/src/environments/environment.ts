@@ -3,6 +3,7 @@
 // The rundown of record substitutions can be found in 'angular.json'.
 
 export const environment = {
+  apiBaseUrl: 'http://localhost:3000/api',
   firebase: {
     apiKey: "AIzaSyDd3Bsiv9SwjF_2EqhZmAdwWpNZjQclmgQ",
   authDomain: "c-b8550.firebaseapp.com",

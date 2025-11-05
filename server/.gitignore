@@ -1,0 +1,7 @@
+# Ignore environment and runtime artifacts locally for the server
+.env
+.env.*
+uploads/
+node_modules/
+logs/
+*.log

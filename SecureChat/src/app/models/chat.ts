@@ -1,10 +1,9 @@
-import { Timestamp } from '@angular/fire/firestore';
 import { ProfileUser } from './user-profile';
 
 export interface Chat {
   id: string;
   lastMessage: string;
-  lastMessageDate?: Date & Timestamp;
+  lastMessageDate?: Date | string | number;
   userIds: string[];
   users: ProfileUser[];
 
@@ -16,5 +15,5 @@ export interface Chat {
 export interface Message {
   text: string;
   senderId: string;
-  sentDate: Date & Timestamp;
+  sentDate: Date | string | number;
 }

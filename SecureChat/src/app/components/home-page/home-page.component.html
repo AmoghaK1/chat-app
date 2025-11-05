@@ -35,7 +35,14 @@
             chat.lastMessageDate | dateDisplay
           }}</span>
         </p>
-        <p mat-line>{{ getDecryptedMessage(chat.lastMessage) }}</p>
+        <p mat-line>
+          <ng-container *ngIf="getDecryptedMessage(chat.lastMessage) as preview">
+            <ng-container *ngIf="preview.startsWith('STEGO::URL::'); else normalPreview">
+              [Stego Image]
+            </ng-container>
+            <ng-template #normalPreview>{{ preview }}</ng-template>
+          </ng-container>
+        </p>
         <mat-divider></mat-divider>
       </mat-list-option>
     </mat-selection-list>
@@ -80,7 +87,17 @@
           >
           
             <div class="chat-bubble">
-              {{ getDecryptedMessage(message.text) }}
+              <ng-container *ngIf="getDecryptedMessage(message.text) as decrypted">
+                <ng-container *ngIf="decrypted.startsWith('STEGO::URL::'); else normalMsg">
+                  <ng-container>
+                    <img [src]="decrypted.replace('STEGO::URL::','')" alt="stego" style="max-width: 240px; display: block; border-radius: 6px;"/>
+                    <button mat-stroked-button color="primary" (click)="onDecodeStego(decrypted.replace('STEGO::URL::',''))">Decode (OTP required)</button>
+                  </ng-container>
+                </ng-container>
+                <ng-template #normalMsg>
+                  {{ decrypted }}
+                </ng-template>
+              </ng-container>
               <span class="chat-time">{{
                 message.sentDate | dateDisplay
               }}</span>
@@ -92,6 +109,12 @@
     </div>
     
     <div class="input-area">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap: wrap; margin-bottom: 8px;">
+        <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+        <input type="text" placeholder="Secret text to embed" [formControl]="stegoSecret" style="flex:1; min-width: 200px;"/>
+        <button mat-stroked-button color="accent" (click)="sendStegoImage()">Embed & Send</button>
+        <span *ngIf="stegoOtp">OTP: {{stegoOtp}} <button mat-button (click)="copyOtp()">Copy</button></span>
+      </div>
       <!--<div class="photo">
         <input #inputField type="file" />
       </div>

@@ -5,16 +5,12 @@ import { RouterModule, Routes } from '@angular/router';
 import { LoginComponent } from './components/login-page/login-page.component';
 import { SignUpComponent } from './components/sign-up-page/sign-up-page.component';
 import { HomeComponent } from './components/home-page/home-page.component';
-import {
-  canActivate,
-  redirectUnauthorizedTo,
-  redirectLoggedInTo,
-} from '@angular/fire/auth-guard';
+import { AuthGuard } from './guards/auth.guard';
+import { GuestGuard } from './guards/guest.guard';
 import { ProfileComponent } from './components/profile-page/profile-page.component';
 import { SecretMessageEmbedderComponent } from './components/Image-Steganography/Image-Steganography.component';
 
-const redirectToLogin = () => redirectUnauthorizedTo(['login']);
-const redirectToHome = () => redirectLoggedInTo(['home']);
+// Guards are implemented locally now; no AngularFire
 
 const routes: Routes = [
   {
@@ -25,27 +21,27 @@ const routes: Routes = [
   {
     path: 'login',
     component: LoginComponent,
-    ...canActivate(redirectToHome),
+    canActivate: [GuestGuard],
   },
   {
     path: 'sign-up',
     component: SignUpComponent,
-    ...canActivate(redirectToHome),
+    canActivate: [GuestGuard],
   },
   {
     path: 'home',
     component: HomeComponent,
-    ...canActivate(redirectToLogin),
+    canActivate: [AuthGuard],
   },
   {
     path: 'profile',
     component: ProfileComponent,
-    ...canActivate(redirectToLogin),
+    canActivate: [AuthGuard],
   },
   {
     path: 'is',
     component: SecretMessageEmbedderComponent,
-    ...canActivate(redirectToLogin),
+    canActivate: [AuthGuard],
   },
 ];
 

@@ -1,0 +1,44 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+.angular/
+.cache/
+tmp/
+temp/
+
+# Environment and secrets
+.env
+*.env
+**/.env
+**/.env.*
+
+# Uploaded files (runtime artifacts)
+server/uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor/IDE
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.iml
+*.swp
+
+# Misc
+.eslintcache
+.tsbuildinfo

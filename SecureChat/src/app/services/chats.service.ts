@@ -1,52 +1,35 @@
 import { Injectable } from '@angular/core';
-import {
-  addDoc,
-  collection,
-  collectionData,
-  doc,
-  Firestore,
-  getDoc,
-  orderBy,
-  query,
-  Timestamp,
-  updateDoc,
-  where,
-} from '@angular/fire/firestore';
-import { concatMap, from, map, Observable, take, tap } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { concatMap, map, Observable, take } from 'rxjs';
 import { Chat, Message } from '../models/chat';
 import { ProfileUser } from '../models/user-profile';
 import { UsersService } from './users.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatsService {
   constructor(
-    private firestore: Firestore,
+    private http: HttpClient,
     private usersService: UsersService
   ) {}
 
   get myChats$(): Observable<Chat[]> {
-    const ref = collection(this.firestore, 'chats');
     return this.usersService.currentUserProfile$.pipe(
       concatMap((user) => {
-        const myQuery = query(
-          ref,
-          where('userIds', 'array-contains', user?.uid)
-        );
-        return collectionData(myQuery, { idField: 'id' }).pipe(
-          map((chats: any) => this.addChatNameAndPic(user?.uid, chats))
-        ) as Observable<Chat[]>;
+        return this.http
+          .get<Chat[]>(`${environment.apiBaseUrl}/chats`, { params: { uid: user?.uid ?? '' } })
+          .pipe(map((chats) => this.addChatNameAndPic(user?.uid, chats)));
       })
     );
   }
 
   createChat(otherUser: ProfileUser): Observable<string> {
-    const ref = collection(this.firestore, 'chats');
     return this.usersService.currentUserProfile$.pipe(
       take(1),
       concatMap((user) =>
-        addDoc(ref, {
+        this.http.post<{ id: string }>(`${environment.apiBaseUrl}/chats`, {
           userIds: [user?.uid, otherUser?.uid],
           users: [
             {
@@ -60,7 +43,7 @@ export class ChatsService {
           ],
         })
       ),
-      map((ref) => ref.id)
+      map((res) => res.id)
     );
   }
 
@@ -80,28 +63,19 @@ export class ChatsService {
   }
 
   addChatMessage(chatId: string, message: string): Observable<any> {
-    const ref = collection(this.firestore, 'chats', chatId, 'messages');
-    const chatRef = doc(this.firestore, 'chats', chatId);
-    const today = Timestamp.fromDate(new Date());
     return this.usersService.currentUserProfile$.pipe(
       take(1),
       concatMap((user) =>
-        addDoc(ref, {
+        this.http.post(`${environment.apiBaseUrl}/chats/${chatId}/messages`, {
           text: message,
           senderId: user?.uid,
-          sentDate: today,
         })
-      ),
-      concatMap(() =>
-        updateDoc(chatRef, { lastMessage: message, lastMessageDate: today })
       )
     );
   }
 
   getChatMessages$(chatId: string): Observable<Message[]> {
-    const ref = collection(this.firestore, 'chats', chatId, 'messages');
-    const queryAll = query(ref, orderBy('sentDate', 'asc'));
-    return collectionData(queryAll) as Observable<Message[]>;
+    return this.http.get<Message[]>(`${environment.apiBaseUrl}/chats/${chatId}/messages`);
   }
 
   addChatNameAndPic(currentUserId: string | undefined, chats: Chat[]): Chat[] {

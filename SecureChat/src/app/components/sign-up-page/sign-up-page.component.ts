@@ -72,13 +72,10 @@ export class SignUpComponent implements OnInit {
   submit() {
     if (!this.signUpForm.valid) return;
 
-    const { name, email, password } = this.signUpForm.value;
+    const { name, email, password } = this.signUpForm.value as any;
     this.authService
-      .signUp(email, password)
+      .signUp(email, password, name)
       .pipe(
-        switchMap(({ user: { uid } }) =>
-          this.usersService.addUser({ uid, email, displayName: name })
-        ),
         this.toast.observe({
           success: 'Congrats! You are all signed up',
           loading: 'Signing in',
